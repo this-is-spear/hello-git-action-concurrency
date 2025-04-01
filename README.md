@@ -50,5 +50,33 @@ jobs:
 \n테스트 진행합니다.
 \n테스트 진행합니다.
 
+다음과 같은 결과가 실행된다.
 
-<img width="2032" alt="스크린샷 2025-04-02 오전 7 52 24" src="https://github.com/user-attachments/assets/24f83cbc-2b80-4cbe-be81-f8a6b1291331" />
+|동시에 세 개 실행|세 개 중 두 개 실패|
+|---|---|
+|<img width="2032" alt="스크린샷 2025-04-02 오전 7 52 24" src="https://github.com/user-attachments/assets/24f83cbc-2b80-4cbe-be81-f8a6b1291331" />|<img width="2032" alt="스크린샷 2025-04-02 오전 7 53 42" src="https://github.com/user-attachments/assets/7a852b38-7127-4c85-8980-020735ef876b" />|
+
+에러는 push 하기 전에 pull을 받아야한다는 메시지가 발생한다.
+
+<img width="1470" alt="스크린샷 2025-04-02 오전 7 53 23" src="https://github.com/user-attachments/assets/579a625e-05fb-44e8-8945-e352ad577337" />
+
+해결할 수 있는 방법은 두 가지다.
+
+- 실패하면  push 될 때까지 pull 받는다.
+- 동시성을 제어한다.
+
+두 번째 방법을 진행해보겠다. git action 에서는 concurrency 키워드를 사용해 진행하면 된다.
+
+```
+
+jobs:
+  build:
+    ...
+    concurrency:
+      group: tis-hello-git-action-concurrency
+      cancel-in-progress: false
+```
+
+
+
+
