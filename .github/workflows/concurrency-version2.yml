@@ -24,6 +24,7 @@ jobs:
           
           # 새 README 내용으로 기존 파일 덮어쓰기
           echo "\n테스트 진행합니다." >> README.md
+
       - name: commit
         run: |
           # 변경 사항이 있는지 확인
@@ -64,6 +65,11 @@ jobs:
               # rebase 시도
               if git pull --rebase origin $(git rev-parse --abbrev-ref HEAD); then
                 echo "Rebase 성공"
+                echo "README.md 파일을 업데이트합니다..."
+                sleep 5
+                
+                # 새 README 내용으로 기존 파일 덮어쓰기
+                echo "\n테스트 진행합니다." >> README.md
               else
                 echo "Rebase 중 충돌 발생, 충돌 해결 시도..."
                 # 충돌이 발생한 경우 자동으로 우리 변경사항 우선 적용
