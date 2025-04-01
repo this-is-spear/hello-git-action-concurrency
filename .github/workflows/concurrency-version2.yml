@@ -33,12 +33,16 @@ jobs:
             exit 0
           fi
           
-          # 변경 사항이 있으면 커밋
-          git commit -m "docs: README 자동 업데이트 [skip ci]"
+          # 마지막 커밋을 푸시한 사용자 정보 가져오기
+          PUSHER_NAME=$(git log -1 --pretty=format:'%an')
+          PUSHER_EMAIL=$(git log -1 --pretty=format:'%ae')
           
-          # Git 설정
-          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
-          git config --global user.name "${GITHUB_ACTOR}"
+          echo "푸시 사용자 이름: $PUSHER_NAME"
+          echo "푸시 사용자 이메일: $PUSHER_EMAIL"
+          
+          # 푸시한 사용자 정보로 Git 설정
+          git config user.name "$PUSHER_NAME"
+          git config user.email "$PUSHER_EMAIL"
           
           # 최대 시도 횟수 설정
           MAX_ATTEMPTS=10
