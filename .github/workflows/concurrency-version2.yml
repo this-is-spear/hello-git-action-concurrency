@@ -1,0 +1,84 @@
+name: Test No Concurrency
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: update readme
+        run: |
+          echo "README.md 파일을 업데이트합니다..."
+          sleep 5
+          
+          # README.md 파일이 존재하는지 확인하고, 없으면 생성
+          if [ ! -f "README.md" ]; then
+            echo "README.md 파일이 존재하지 않아 새로 생성합니다."
+          fi
+          
+          # 새 README 내용으로 기존 파일 덮어쓰기
+          echo "\n테스트 진행합니다." >> README.md
+      - name: commit
+        run: |
+          # 변경 사항이 있는지 확인
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "README에 변경 사항이 없습니다."
+            exit 0
+          fi
+          
+          # 변경 사항이 있으면 커밋
+          git commit -m "docs: README 자동 업데이트 [skip ci]"
+          
+          # Git 설정
+          git config --global user.email "${GITHUB_ACTOR}@users.noreply.github.com"
+          git config --global user.name "${GITHUB_ACTOR}"
+          
+          # 최대 시도 횟수 설정
+          MAX_ATTEMPTS=10
+          ATTEMPT=1
+          
+          # 푸시 성공할 때까지 반복
+          while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
+            echo "푸시 시도 $ATTEMPT/$MAX_ATTEMPTS..."
+            
+            if git push; then
+              echo "푸시 성공!"
+              exit 0
+            else
+              echo "푸시 실패, rebase 수행 후 다시 시도합니다..."
+              
+              # 최신 변경사항 가져오기
+              git fetch origin
+              
+              # rebase 시도
+              if git pull --rebase origin $(git rev-parse --abbrev-ref HEAD); then
+                echo "Rebase 성공"
+              else
+                echo "Rebase 중 충돌 발생, 충돌 해결 시도..."
+                # 충돌이 발생한 경우 자동으로 우리 변경사항 우선 적용
+                git checkout --theirs .
+                git add .
+                git rebase --continue
+              fi
+              
+              # 다음 시도
+              ATTEMPT=$((ATTEMPT+1))
+              
+              # 마지막 시도가 아니면 잠시 대기
+              if [ $ATTEMPT -le $MAX_ATTEMPTS ]; then
+                WAIT_TIME=$((RANDOM % 10 + 5))
+                echo "다음 시도까지 ${WAIT_TIME}초 대기..."
+                sleep $WAIT_TIME
+              fi
+            fi
+          done
+          
+          echo "최대 시도 횟수($MAX_ATTEMPTS)에 도달했습니다. 푸시 실패."
+          exit 1
