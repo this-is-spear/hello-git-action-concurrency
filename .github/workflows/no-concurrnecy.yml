@@ -27,6 +27,17 @@ jobs:
 
       - name: commit
         run: |
+          # 마지막 커밋을 푸시한 사용자 정보 가져오기
+          PUSHER_NAME=$(git log -1 --pretty=format:'%an')
+          PUSHER_EMAIL=$(git log -1 --pretty=format:'%ae')
+          
+          echo "푸시 사용자 이름: $PUSHER_NAME"
+          echo "푸시 사용자 이메일: $PUSHER_EMAIL"
+          
+          # 푸시한 사용자 정보로 Git 설정
+          git config user.name "$PUSHER_NAME"
+          git config user.email "$PUSHER_EMAIL"
+          
           # 변경 사항이 있는지 확인
           git add README.md
           if git diff --staged --quiet; then
