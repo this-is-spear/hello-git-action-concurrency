@@ -1,0 +1,52 @@
+name: Test Concurrency Version 1
+
+on:
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    concurrency:
+      group: tis-hello-git-action-concurrency
+      cancel-in-progress: false
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: update readme
+        run: |
+          echo "README.md 파일을 업데이트합니다..."
+          sleep 5
+          
+          # README.md 파일이 존재하는지 확인하고, 없으면 생성
+          if [ ! -f "README.md" ]; then
+            echo "README.md 파일이 존재하지 않아 새로 생성합니다."
+          fi
+          
+          # 새 README 내용으로 기존 파일 덮어쓰기
+          echo "\n테스트 진행합니다." >> README.md
+
+      - name: commit
+        run: |
+          # 마지막 커밋을 푸시한 사용자 정보 가져오기
+          PUSHER_NAME=$(git log -1 --pretty=format:'%an')
+          PUSHER_EMAIL=$(git log -1 --pretty=format:'%ae')
+          
+          echo "푸시 사용자 이름: $PUSHER_NAME"
+          echo "푸시 사용자 이메일: $PUSHER_EMAIL"
+          
+          # 푸시한 사용자 정보로 Git 설정
+          git config user.name "$PUSHER_NAME"
+          git config user.email "$PUSHER_EMAIL"
+          
+          # 변경 사항이 있는지 확인
+          git add README.md
+          if git diff --staged --quiet; then
+            echo "README에 변경 사항이 없습니다."
+            exit 0
+          fi
+          
+          # 변경 사항이 있으면 커밋 후 푸시
+          git commit -m "docs: README 자동 업데이트 [skip ci]"
+          git push
