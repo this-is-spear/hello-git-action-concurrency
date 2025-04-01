@@ -47,3 +47,4 @@ jobs:
           git commit -m "docs: README 자동 업데이트 [skip ci]"
           git push
 ```
+\n테스트 진행합니다.
