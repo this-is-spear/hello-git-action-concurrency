@@ -22,7 +22,6 @@ jobs:
 
       - name: commit
         run: |
-          git add README.md
           
           # 마지막 커밋을 푸시한 사용자 정보 가져오기
           PUSHER_NAME=$(git log -1 --pretty=format:'%an')
@@ -42,6 +41,8 @@ jobs:
           # 푸시 성공할 때까지 반복
           while [ $ATTEMPT -le $MAX_ATTEMPTS ]; do
             echo "푸시 시도 $ATTEMPT/$MAX_ATTEMPTS..."
+            git add README.md
+            git commit -m "docs: README 자동 업데이트 [skip ci]"
             
             if git push; then
               echo "푸시 성공!"
@@ -60,7 +61,6 @@ jobs:
                 
                 # 새 README 내용으로 기존 파일 덮어쓰기
                 echo "\n테스트 진행합니다." >> README.md
-                git add README.md
               else
                 echo "Rebase 중 충돌 발생, 충돌 해결 시도..."
                 # 충돌이 발생한 경우 자동으로 우리 변경사항 우선 적용
