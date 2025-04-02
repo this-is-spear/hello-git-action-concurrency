@@ -62,27 +62,17 @@ jobs:
 
 해결할 수 있는 방법은 두 가지다.
 
-- 실패하면  push 될 때까지 pull 받는다.
+- 실패하면  push 될 때까지 rebase 받는다.
 - 동시성을 제어한다.
+
+첫 번째는 rebase 하면서 push 될 때까지 작업하는 방법이다.
+
+- git action 작업을 순차적으로 실행시킬 수 있는 유일한 방법이다.
+- 작업이 어려울 수록 git action 파일이 복잡해지는 단점이 있다.
+
 
 두 번째 방법을 진행해보겠다. git action 에서는 concurrency 키워드를 사용해 진행하면 된다.
 
-```
+- concurrency 는 진행 중인 작업을 실패시키고 이후 작업을 바로 진행하거나 이후 작업을 실패시킬 수 있도록 설정할 수 있다.
+- 이후 작업이 대기하지 않는다.
 
-jobs:
-  build:
-    ...
-    concurrency:
-      group: tis-hello-git-action-concurrency
-      cancel-in-progress: false
-```
-
-
-
-
-\n테스트 진행합니다.
-테스트 진행합니다.
-테스트 진행합니다.
-\n테스트 진행합니다.
-\n테스트 진행합니다.
-\n테스트 진행합니다.
